@@ -1,0 +1,91 @@
+/* --- Página de Apoio Financeiro (versão aprimorada) --- */
+
+.video-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 45px; /* 🔹 Aumentado o espaçamento entre os vídeos */
+  margin-top: 30px;
+}
+
+.video-grid iframe {
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.video-grid iframe:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 25px rgba(0,0,0,0.6);
+}
+
+/* 🔹 Cartões de cursos */
+.curso-card {
+  display: flex;
+  gap: 20px;
+  background: rgba(77, 182, 172, 0.15);
+  border: 1px solid rgba(77,182,172,0.4);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.curso-card:hover {
+  background: rgba(77, 182, 172, 0.25);
+  transform: translateY(-4px);
+}
+
+/* 🔹 Links — mais destaque e brilho */
+.curso-card a,
+.livros-lista a {
+  color: #00eaff; /* cor mais vibrante */
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.curso-card a:hover,
+.livros-lista a:hover {
+  color: #00bcd4;
+  text-shadow: 0 0 8px rgba(0, 236, 255, 0.7);
+  text-decoration: underline;
+}
+
+/* 🔹 Lista de livros */
+.livros-lista li {
+  margin-bottom: 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding-bottom: 12px;
+  list-style-type: "📘 ";
+  color: #e0f7fa;
+}
+
+/* 🔹 Destaque visual */
+.destaque {
+  background: linear-gradient(135deg, #304163, #4a63a8);
+  text-align: center;
+  border: 1px solid rgba(39, 35, 35, 0.1);
+  border-radius: 10px;
+  padding: 25px;
+  margin-top: 25px;
+}
+
+.destaque p {
+  font-size: 1.2rem;
+  margin-top: 10px;
+  color: #e0f7fa;
+}
+
+/* 🔹 Responsividade */
+@media (max-width: 768px) {
+  .video-grid {
+    grid-template-columns: 1fr;
+    gap: 25px; /* ainda mantém espaço entre vídeos */
+  }
+
+  .curso-card {
+    flex-direction: column;
+    text-align: center;
+  }
+}
