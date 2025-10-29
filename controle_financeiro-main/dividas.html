@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dívidas — Controle Financeiro</title>
+    <link rel="stylesheet" href="dividas.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="container nav-content">
+            <h1 class="logo">💳 Suas Dívidas</h1>
+            <nav>
+                <a href="index.html">Início</a>
+                <a href="dividas.html" class="active">Dívidas</a>
+                <a href="saldo.html">Saldo</a>
+                <a href="grafico.html">📈 Gráfico</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <section class="card fade-in">
+            <h2>➕ Adicionar Dívida</h2>
+            <form id="formDivida">
+                <input type="text" id="descricao" placeholder="Descrição da dívida" required>
+                <input type="number" id="valor" placeholder="Valor (R$)" step="0.01" required>
+                <select id="categoria">
+                    <option value="contas">Contas (Luz, Água, Internet...)</option>
+                    <option value="alimentacao">Alimentação</option>
+                    <option value="saude">Saúde</option>
+                    <option value="outros">Outros</option>
+                </select>
+                <button type="submit" class="primary">Adicionar Dívida</button>
+            </form>
+        </section>
+
+        <section class="card fade-in destaque">
+            <h2>💰 Saldo Atual</h2>
+            <p><strong>Saldo:</strong> <span id="saldo">R$ 0,00</span></p>
+        </section>
+
+        <section class="card fade-in">
+            <h2>📋 Dívidas Ativas</h2>
+            <ul id="listaDividas"></ul>
+
+            <div class="actions">
+                <button id="quitarTodasBtn" class="btn-secondary">💸 Quitar Todas</button>
+                <button id="zerarDividasBtn" class="btn-danger">🧹 Zerar Dívidas</button>
+            </div>
+        </section>
+
+        <section class="card fade-in">
+            <h2>✅ Dívidas Pagas</h2>
+            <ul id="dividasPagas"></ul>
+        </section>
+    </main>
+
+    <script>
+        // 1. Definições e Inicialização
+        const $ = id => document.getElementById(id); // Função auxiliar para selecionar elementos
+        const form = $("formDivida"), lista = $("listaDividas"), pagasLista = $("dividasPagas"), saldoEl = $("saldo");
+        
+        // Carrega dados do LocalStorage
+        let resumo = JSON.parse(localStorage.getItem("resumoFinanceiro")) || { saldo: 0, entradas: 0, saidas: 0 };
+        let dividas = JSON.parse(localStorage.getItem("dividas")) || [];
+        let dividasPagas = JSON.parse(localStorage.getItem("dividasPagas")) || [];
+
+        // Função compacta para salvar todos os dados no LocalStorage
+        const salvar = () => {
+            localStorage.setItem("dividas", JSON.stringify(dividas));
+            localStorage.setItem("dividasPagas", JSON.stringify(dividasPagas));
+            localStorage.setItem("resumoFinanceiro", JSON.stringify(resumo));
+        };
+
+        // Função principal de renderização (mais compacta)
+        const renderizar = () => {
+            saldoEl.textContent = `R$ ${resumo.saldo.toFixed(2)}`;
+            
+            // Renderiza Dívidas Ativas (map + join para otimização)
+            lista.innerHTML = dividas.map((d, i) => {
+                const cat = d.categoria || 'outros';
+                return `
+                    <li class="divida ${cat}">
+                        <div>
+                            <strong>${d.descricao || "Sem descrição"}</strong><br>
+                            <small>${cat.charAt(0).toUpperCase() + cat.slice(1)}</small>
+                        </div>
+                        <div>
+                            <span>R$ ${(d.valor || 0).toFixed(2)}</span>
+                            <button data-index="${i}" class="pagar-btn">Pagar</button>
+                        </div>
+                    </li>
+                `;
+            }).join('');
+
+            // Renderiza Dívidas Pagas (map + join para otimização)
+            pagasLista.innerHTML = dividasPagas.map(d => {
+                const cat = d.categoria || 'outros';
+                return `
+                    <li class="paga">
+                        <strong>${d.descricao || "Sem descrição"}</strong> 
+                        - ${cat} 
+                        <span>💸 R$ ${(d.valor || 0).toFixed(2)}</span>
+                    </li>
+                `;
+            }).join('');
+        };
+
+        // Chama renderizar ao carregar
+        renderizar();
+
+        // 2. Event Listener: Adicionar Dívida
+        form.addEventListener("submit", e => {
+            e.preventDefault();
+            const descricao = $("descricao").value.trim();
+            const valor = parseFloat($("valor").value);
+            const categoria = $("categoria").value;
+
+            if (!descricao || isNaN(valor)) return alert("Preencha todos os campos!");
+
+            dividas.push({ descricao, valor, categoria });
+            salvar();
+            renderizar();
+            form.reset();
+        });
+
+        // 3. Event Listener: Pagar Dívida Individual (com verificação)
+        lista.addEventListener("click", e => {
+            if (e.target.classList.contains("pagar-btn")) {
+                const index = e.target.dataset.index;
+                const divida = dividas[index];
+
+                if (resumo.saldo < divida.valor) return alert("Saldo insuficiente!");
+
+                // Atualiza resumo
+                resumo.saldo -= divida.valor;
+                resumo.saidas += divida.valor;
+
+                // Move e remove
+                dividasPagas.push(divida);
+                dividas.splice(index, 1);
+
+                salvar();
+                renderizar();
+            }
+        });
+
+        // 4. Event Listener: Quitar Todas as Dívidas
+        $("quitarTodasBtn").addEventListener("click", () => {
+            if (dividas.length === 0) return alert("Nenhuma dívida ativa para quitar.");
+
+            const totalDividas = dividas.reduce((acc, d) => acc + d.valor, 0);
+
+            if (resumo.saldo < totalDividas) return alert("Saldo insuficiente para quitar todas as dívidas!");
+
+            // Atualiza resumo e move todos de uma vez
+            resumo.saldo -= totalDividas;
+            resumo.saidas += totalDividas;
+            dividasPagas.push(...dividas);
+            dividas = [];
+
+            salvar();
+            renderizar();
+            alert("✅ Todas as dívidas foram quitadas!");
+        });
+
+        // 5. Event Listener: Zerar/Limpar Todas as Dívidas
+        $("zerarDividasBtn").addEventListener("click", () => {
+            if (dividas.length === 0 && dividasPagas.length === 0) return alert("Nenhuma dívida para zerar.");
+
+            if (!confirm("⚠️ Tem certeza que deseja apagar todas as dívidas? Esta ação não pode ser desfeita.")) return;
+
+            // Zera ambos os arrays
+            dividas = [];
+            dividasPagas = [];
+            
+            salvar();
+            renderizar();
+            alert("🧹 Todas as dívidas foram zeradas!");
+        });
+    </script>
+</body>
+</html>

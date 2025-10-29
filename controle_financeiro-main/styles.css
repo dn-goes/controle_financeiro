@@ -1,0 +1,259 @@
+/* --- Reset Básico & Fontes --- */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  /* O DEGRADÊ AZUL que você pediu */
+  background: linear-gradient(135deg, #1d2b4a, #0c1020);
+  background-attachment: fixed;
+  color: #e0e0e0;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* --- Header / Barra de Navegação --- */
+.navbar {
+  background: rgba(12, 16, 32, 0.6); /* Fundo semi-transparente */
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.navbar nav a {
+  color: #b0c4de;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-left: 25px;
+  transition: color 0.3s ease;
+}
+
+.navbar nav a:hover {
+  color: #fff;
+}
+
+.navbar nav a.active {
+  color: #4db6ac; /* Um ciano para destacar */
+  font-weight: 700;
+  border-bottom: 2px solid #4db6ac;
+  padding-bottom: 5px;
+}
+
+/* --- Layout Principal (Grid) --- */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Duas colunas */
+  gap: 25px;
+  padding: 30px 0;
+}
+
+/* --- Estilo dos Cards --- */
+.card {
+  /* Fundo escuro levemente azulado */
+  background: #2b3048; 
+  border-radius: 12px;
+  padding: 25px;
+  /* Sombra suave para profundidade */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+}
+
+/* --- Seções Específicas --- */
+
+/* 1. Painel (Visão Geral) */
+.painel {
+  grid-column: 1 / -1; /* Ocupa as duas colunas */
+}
+
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.card-mini {
+  padding: 20px;
+  border-radius: 8px;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.card-mini h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+  opacity: 0.9;
+}
+
+.card-mini p {
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+/* Cores dos mini-cards */
+.card-mini.verde {
+  background: linear-gradient(135deg, #43a047, #66bb6a);
+}
+.card-mini.azul {
+  background: linear-gradient(135deg, #1e88e5, #42a5f5);
+}
+.card-mini.vermelho {
+  background: linear-gradient(135deg, #e53935, #ef5350);
+}
+
+/* 2. Ações Rápidas */
+.quick-actions {
+  grid-column: 1 / -1; /* Ocupa as duas colunas */
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.btn {
+  flex-grow: 1; /* Faz os botões ocuparem espaço igual */
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn i {
+  font-size: 1.3rem; /* Tamanho do ícone (Phosphor icons) */
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-success { background: #4caf50; }
+.btn-danger { background: #f44336; }
+.btn-warning { background: #f57c00; }
+
+
+/* 3. Gráfico */
+.grafico {
+  grid-column: 1 / 2; /* Coluna 1 */
+}
+
+.chart-container {
+  position: relative;
+  height: 300px; /* Altura fixa para o gráfico */
+}
+
+/* 4. Estatísticas */
+.estatisticas {
+  grid-column: 2 / 3; /* Coluna 2 */
+}
+
+.estat-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.estat-grid div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.1rem;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.estat-grid span {
+  color: #b0c4de; /* Tom de azul claro para o label */
+}
+
+.estat-grid b {
+  color: #fff;
+  font-weight: 700;
+}
+
+/* --- Footer --- */
+.site-footer {
+  text-align: center;
+  padding: 30px 20px;
+  margin-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #b0c4de;
+}
+
+/* --- Responsividade (Celular) --- */
+@media (max-width: 768px) {
+  .main-grid {
+    /* Uma coluna em telas menores */
+    grid-template-columns: 1fr; 
+  }
+
+  .painel,
+  .quick-actions,
+  .grafico,
+  .estatisticas {
+    grid-column: 1 / -1; /* Todos ocupam 100% */
+  }
+
+  .grid-cards {
+    grid-template-columns: 1fr; /* Empilha os cards */
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .navbar {
+    padding: 15px;
+  }
+  
+  .nav-content {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .navbar nav a {
+    margin: 0 10px;
+  }
+}

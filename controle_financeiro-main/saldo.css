@@ -1,0 +1,163 @@
+/*
+* CSS ATUALIZADO: Tema Escuro com Gradiente Suave
+* Baseado no layout inicial, mas utilizando a paleta de cores escura solicitada.
+*/
+
+body {
+    font-family: "Poppins", sans-serif;
+    /* NOVO DEGRADÊ: Azul Escuro Suave */
+    background: linear-gradient(135deg, #101624, #1b2b4a); 
+    color: #fff;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.navbar {
+    /* Cor do navbar mais escura para contraste */
+    background: #0d1424; 
+    text-align: center;
+    padding: 1.2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+}
+
+.navbar h1 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+.navbar nav a {
+    color: #ccc; /* Cor neutra para links */
+    margin: 0 10px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.navbar nav a:hover,
+.navbar nav a.ativo {
+    color: #4cafef; /* Cor de destaque para hover */
+}
+
+.container {
+    width: 90%;
+    max-width: 900px;
+    margin: 20px auto;
+    flex-grow: 1;
+}
+
+.card {
+    /* Mantém a transparência, mas com cor de fundo escura */
+    background: #16213e; 
+    border-radius: 14px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    /* Mantido o efeito de blur, se desejado */
+    /* backdrop-filter: blur(8px); */ 
+    animation: fadeIn 0.6s ease;
+}
+
+h2 {
+    color: #4cafef; /* Cor de destaque para títulos */
+    margin-bottom: 10px;
+}
+
+/* --- Seções de Resumo (Saldo, Entradas, Saídas) --- */
+.resumo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    text-align: center;
+    gap: 15px;
+}
+
+.resumo-grid div {
+    /* Fundo mais discreto para as caixas de resumo */
+    background: #1e2a47; 
+    padding: 15px;
+    border-radius: 10px;
+}
+
+#saldo {
+    font-size: 1.8em;
+    color: #00ff99; /* Verde neon para o saldo (bom contraste) */
+    font-weight: bold;
+}
+
+#entradas {
+    color: #00ffcc;
+}
+
+#saidas {
+    color: #ff6666;
+}
+
+/* --- Formulário e Botões --- */
+.form-transacao {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-transacao input,
+.form-transacao select {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    background: #25334e; /* Fundo escuro para inputs */
+    color: #fff;
+}
+
+.btn-adicionar {
+    background: #4cafef; /* Azul de destaque para o botão */
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-adicionar:hover {
+    background: #1e90ff;
+}
+
+/* --- Lista de Gastos --- */
+.gastos-lista {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.gastos-lista li {
+    background: #1e2a47;
+    margin-bottom: 10px;
+    padding: 12px 15px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.gastos-lista li span.valor {
+    color: #ff6666; /* Cor de saída */
+    font-weight: bold;
+}
+
+/* --- Rodapé --- */
+footer {
+    text-align: center;
+    padding: 15px;
+    background: #0d1424; /* Cor de fundo do navbar para consistência */
+    margin-top: auto;
+    font-size: 0.9em;
+    color: #aaa;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

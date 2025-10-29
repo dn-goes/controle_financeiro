@@ -1,0 +1,191 @@
+/* --- Importação de Fontes --- */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+/* --- Variáveis de Cor (Consistente com os gráficos) --- */
+:root {
+    --bg-gradient-start: #1d2b4a;      /* Azul escuro */
+    --bg-gradient-end: #0c1020;        /* Azul muito escuro */
+    --card-bg: #2b3048;                /* Fundo dos cards/formulários */
+    --input-bg: #3f4460;               /* Fundo dos campos de input */
+    --text-primary: #e0e0e0;           /* Cor principal do texto */
+    --text-secondary: #b0c4de;         /* Cor secundária/placeholders */
+    --primary-blue: #2196f3;           /* Azul principal (Botão) */
+    --primary-red: #f44336;            /* Vermelho para erros */
+    --border-color: rgba(255, 255, 255, 0.1); /* Borda suave */
+}
+
+/* --- Estilos Globais e Reset --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Corpo da página de login/cadastro */
+.login-body {
+    /* Mesmo degradê da página de relatórios */
+    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-primary);
+}
+
+/* --- Contêiner Principal do Formulário --- */
+.login-container {
+    background: var(--card-bg);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Sombra mais forte */
+    width: 100%;
+    max-width: 450px; /* Largura máxima para centralizar */
+    border: 1px solid var(--border-color);
+}
+
+.logo-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+    font-size: 1rem;
+}
+
+/* --- Formulário e Inputs --- */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espaço entre os elementos */
+}
+
+.login-form label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    /* Mantido: move o label para mais perto do input, funciona bem no layout column */
+    margin-bottom: -10px; 
+}
+
+.login-form input {
+    background: var(--input-bg);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 15px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Efeito ao focar no input */
+.login-form input:focus {
+    border-color: var(--primary-blue);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.3);
+}
+
+.login-form input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+/* Inputs em grupo (lado a lado) */
+.input-group-half {
+    display: flex;
+    gap: 20px;
+    /* Ajusta o gap vertical para o modo mobile */
+    margin-bottom: -15px; 
+}
+
+.input-group-half > div {
+    flex: 1; /* Ocupa metade do espaço */
+    /* Garante que o conteúdo interno também seja flexível na vertical */
+    display: flex; 
+    flex-direction: column;
+    gap: 15px; /* Adiciona espaçamento interno para separar label e input */
+}
+
+/* --- Botão Principal --- */
+.login-form button.primary {
+    background: var(--primary-blue);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 15px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s ease, transform 0.1s;
+}
+
+.login-form button.primary:hover {
+    background: #0d84e4; /* Azul um pouco mais escuro */
+}
+
+.login-form button.primary:active {
+    transform: scale(0.99);
+}
+
+/* --- Mensagem de Erro --- */
+.error-message {
+    color: var(--primary-red);
+    background: rgba(244, 67, 54, 0.1);
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: block;
+}
+
+/* --- Link de Cadastro/Login --- */
+.register-text {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.register-text a {
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 700;
+    transition: color 0.3s;
+}
+
+.register-text a:hover {
+    color: #fff;
+}
+
+/* --- CORREÇÃO DE RESPONSIVIDADE --- 
+    Ajustamos o `.input-group-half > div` para ter um gap interno.
+*/
+@media (max-width: 500px) {
+    .login-container {
+        margin: 20px;
+        padding: 30px 20px;
+    }
+
+    .input-group-half {
+        flex-direction: column; /* Em celulares, ficam empilhados */
+        gap: 15px; /* Adiciona espaço entre os blocos (Idade e Renda) */
+        margin-bottom: 0;
+    }
+    
+    /* ZERA o gap interno, pois o gap externo é suficiente */
+    .input-group-half > div {
+        gap: 5px; /* Reduz o gap entre o label e o input no mobile */
+    }
+
+    .logo-title {
+        font-size: 2rem;
+    }
+}

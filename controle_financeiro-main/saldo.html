@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💰 Saldo — Controle Financeiro</title>
+  <link rel="stylesheet" href="saldo.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="navbar">
+    <h1>💰 Controle de Saldo</h1>
+    <nav>
+      <a href="index.html">🏠 Início</a>
+      <a href="grafico.html">📈 Gráfico</a>
+      <a href="dividas.html">💳 Dívidas</a>
+      <a href="saldo.html" class="ativo">💰 Saldo</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- DEFINIR SALDO INICIAL -->
+    <section class="card saldo-inicial">
+      <h2>🏦 Saldo Inicial</h2>
+      <form id="formSaldoInicial" class="form-transacao">
+        <input type="number" id="saldoInicial" placeholder="Digite seu saldo atual (R$)" step="0.01" required />
+        <button type="submit" class="btn-adicionar">Salvar Saldo Inicial</button>
+      </form>
+    </section>
+
+    <!-- RESUMO -->
+    <section class="card saldo-info">
+      <h2>Resumo Financeiro</h2>
+      <div class="resumo-grid">
+        <div>
+          <h3>💸 Saldo Atual</h3>
+          <p id="saldo">R$ 0,00</p>
+        </div>
+        <div>
+          <h3>📥 Entradas</h3>
+          <p id="entradas">R$ 0,00</p>
+        </div>
+        <div>
+          <h3>📤 Gastos</h3>
+          <p id="saidas">R$ 0,00</p>
+        </div>
+      </div>
+      <canvas id="graficoSaldo"></canvas>
+    </section>
+
+    <!-- FORMULÁRIO DE TRANSAÇÃO -->
+    <section class="card add-transacao">
+      <h2>📝 Adicionar Transação</h2>
+      <form id="formTransacao" class="form-transacao">
+        <input type="text" id="descricao" placeholder="Descrição" required />
+        <input type="number" id="valor" placeholder="Valor (R$)" step="0.01" required />
+        <select id="tipo" required>
+          <option value="entrada">Entrada</option>
+          <option value="saida">Saída</option>
+        </select>
+        <button type="submit" class="btn-adicionar">Adicionar</button>
+      </form>
+    </section>
+
+    <!-- LISTA DE GASTOS -->
+    <section class="card lista-gastos">
+      <h2>🧾 Histórico de Gastos</h2>
+      <ul id="listaGastos" class="gastos-lista"></ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>Desenvolvido por <b>Daniel</b>, <b>Laiza</b> e <b>Gleice</b> — 2025</p>
+  </footer>
+
+  <script src="js/saldo.js"></script>
+</body>
+</html>

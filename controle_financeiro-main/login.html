@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro — Controle Financeiro</title>
+  
+  <link rel="stylesheet" href="login.css" />
+</head>
+<body class="login-body">
+  <div class="login-container">
+    
+    <h1 class="logo-title">💰 Controle Financeiro</h1>
+    <p class="subtitle">Crie sua conta e comece a controlar suas finanças!</p>
+
+    <form id="registerForm" class="login-form">
+      
+      <label for="name">Nome Completo</label>
+      <input type="text" id="name" placeholder="Seu nome" required />
+
+      <label for="email">E-mail</label>
+      <input type="email" id="email" placeholder="email@exemplo.com" required />
+      
+      <div class="input-group-half">
+          <div>
+              <label for="age">Idade</label>
+              <input type="number" id="age" min="18" max="120" placeholder="Idade" required />
+          </div>
+          <div>
+              <label for="renda">Renda Mensal (Estimada)</label>
+              <input type="number" id="renda" min="0" step="100" placeholder="R$ 3000" required />
+          </div>
+      </div>
+
+      <label for="password">Senha</label>
+      <input type="password" id="password" placeholder="Mínimo 6 caracteres" required />
+      
+      <label for="confirmPassword">Confirme a Senha</label>
+      <input type="password" id="confirmPassword" placeholder="Repita a senha" required />
+
+      <p class="error-message" id="errorMessage"></p>
+      
+      <button type="submit" class="primary">Cadastrar e Entrar</button>
+    </form>
+
+    <p class="register-text">
+      Já tem conta? <a href="login.html">Acesse aqui</a>
+    </p>
+  </div>
+
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const age = parseInt(document.getElementById("age").value);
+      const renda = parseFloat(document.getElementById("renda").value);
+      const password = document.getElementById("password").value.trim();
+      const confirmPassword = document.getElementById("confirmPassword").value.trim();
+      const errorEl = document.getElementById("errorMessage");
+
+      errorEl.textContent = ""; // Limpa mensagens de erro antigas
+
+      // 1. Validação básica de campos
+      if (!name || !email || !age || !renda || !password || !confirmPassword) {
+        errorEl.textContent = "⚠️ Preencha todos os campos obrigatórios!";
+        return;
+      }
+      
+      // 2. Validação da idade
+      if (age < 18) {
+          errorEl.textContent = "⚠️ Você deve ser maior de 18 anos para se cadastrar.";
+          return;
+      }
+
+      // 3. Validação de senha
+      if (password.length < 6) {
+        errorEl.textContent = "⚠️ A senha deve ter no mínimo 6 caracteres.";
+        return;
+      }
+
+      // 4. Validação de confirmação de senha
+      if (password !== confirmPassword) {
+        errorEl.textContent = "⚠️ As senhas não coincidem!";
+        return;
+      }
+      
+      // Se TUDO estiver OK:
+      
+      // Simulação de armazenamento do usuário no localStorage
+      const userData = {
+        name: name,
+        email: email,
+        age: age,
+        renda: renda,
+        // Em um projeto real, NUNCA salvaríamos a senha assim, mas para a simulação, é aceitável.
+        password: password 
+      };
+
+      // Salva os dados do novo usuário e marca como logado
+      localStorage.setItem("currentUser", JSON.stringify(userData));
+      
+      // Redireciona para a página principal (index.html)
+      alert(`🎉 Cadastro realizado com sucesso, ${name}! Redirecionando...`);
+      window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>

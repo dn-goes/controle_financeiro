@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel — Controle Financeiro</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+  
+  <header class="navbar">
+    <div class="container nav-content">
+      <h1 class="logo">💰 Controle Financeiro</h1>
+      <nav>
+        <a href="index.html">🏠 Início</a>
+        <a href="grafico.html">📈 Gráfico</a>
+        <a href="dividas.html">💳 Dívidas</a>
+        <a href="saldo.html" class="ativo">💰 Saldo</a>
+        <a href="login.html">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="main-grid">
+      
+      <section class="card painel">
+        <div class="grid-cards">
+          <div class="card-mini verde">
+            <h3>Saldo Atual</h3>
+            <p id="saldo">R$ 0,00</p>
+          </div>
+          <div class="card-mini azul">
+            <h3>Entradas (Mês)</h3>
+            <p id="entradas">R$ 0,00</p>
+          </div>
+          <div class="card-mini vermelho">
+            <h3>Saídas (Mês)</h3>
+            <p id="saidas">R$ 0,00</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card quick-actions">
+        <h2>⚡ Ações Rápidas</h2>
+        <div class="action-buttons">
+          <button class="btn btn-success">
+            <i class="ph-plus-circle"></i> Nova Receita
+          </button>
+          <button class="btn btn-danger">
+            <i class="ph-minus-circle"></i> Nova Despesa
+          </button>
+          <button id="btnFecharMes" class="btn btn-primary" title="Arquiva este mês e zera transações">
+            <i class="ph-calendar-check"></i> Fechar mês
+          </button>
+          <button class="btn btn-warning">
+            <i class="ph-receipt"></i> Adicionar Dívida <link rel="stylesheet" href="dividas.html">
+          </button>
+        </div>
+      </section>
+
+      <section class="card grafico">
+        <h2>📈 Entradas vs. Saídas</h2>
+        <div class="chart-container">
+          <canvas id="graficoFinanceiro"></canvas>
+        </div>
+      </section>
+
+      <section class="card estatisticas">
+        <h2>📋 Estatísticas Gerais</h2>
+        <div class="estat-grid">
+          <div>
+            <span>💚 Saúde Financeira (Poupança):</span>
+            <b id="estatSaudeFinanceira">0%</b>
+          </div>
+          <div>
+            <span>💸 Gasto médio diário (mês):</span>
+            <b id="estatMediaGasto">R$ 0,00</b>
+          </div>
+          <div>
+            <span>⚠️ Dívidas ativas:</span>
+            <b id="estatDividasAtivas">0</b>
+          </div>
+          <div>
+            <span>✅ Dívidas pagas:</span>
+            <b id="estatPagas">0</b>
+          </div>
+        </div>
+      </section>
+      
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>Desenvolvido por <b>Daniel</b>, <b>Laiza</b> e <b>Gleice</b> — 2025</p>
+  </footer>
+
+  <script>
+    const saldoEl = document.getElementById("saldo");
+    const entradasEl = document.getElementById("entradas");
+    const saidasEl = document.getElementById("saidas");
+
+    // Novos elementos
+    const estatMediaEl = document.getElementById("estatMediaGasto");
+    const estatDividasEl = document.getElementById("estatDividasAtivas");
+    const estatPagasEl = document.getElementById("estatPagas");
+    const estatSaudeEl = document.getElementById("estatSaudeFinanceira");
+    const ctx = document.getElementById("graficoFinanceiro").getContext('2d');
+
+    // Função para formatar como moeda BRL
+    function formatCurrency(value) {
+      return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function atualizarDashboard() {
+      // Puxa dados do localStorage
+      const resumo = JSON.parse(localStorage.getItem("resumoFinanceiro")) || { saldo: 0, entradas: 0, saidas: 0 };
+      const dividas = JSON.parse(localStorage.getItem("dividas")) || [];
+      const pagas = JSON.parse(localStorage.getItem("dividasPagas")) || [];
+
+      // 1. Atualiza os cards principais
+      saldoEl.textContent = formatCurrency(resumo.saldo);
+      entradasEl.textContent = formatCurrency(resumo.entradas);
+      saidasEl.textContent = formatCurrency(resumo.saidas);
+
+      // 2. Atualiza as estatísticas
+      
+      // Gasto médio (assumindo 30 dias no mês)
+      const gastoMedio = resumo.saidas > 0 ? (resumo.saidas / 30) : 0;
+      estatMediaEl.textContent = formatCurrency(gastoMedio);
+
+      // Dívidas
+      estatDividasEl.textContent = dividas.length;
+      estatPagasEl.textContent = pagas.length;
+
+      // Saúde Financeira (Taxa de Poupança)
+      let taxaPoupanca = 0;
+      if (resumo.entradas > 0) {
+        taxaPoupanca = ((resumo.entradas - resumo.saidas) / resumo.entradas) * 100;
+      }
+      // Garante que a taxa não seja negativa na exibição (ex: se gastou mais do que ganhou)
+      taxaPoupanca = Math.max(0, taxaPoupanca); 
+      estatSaudeEl.textContent = `${taxaPoupanca.toFixed(1)}%`;
+      
+      // Define a cor baseada na taxa
+      if (taxaPoupanca < 10) {
+        estatSaudeEl.style.color = '#f44336'; // Vermelho
+      } else if (taxaPoupanca < 30) {
+        estatSaudeEl.style.color = '#ffeb3b'; // Amarelo
+      } else {
+        estatSaudeEl.style.color = '#4caf50'; // Verde
+      }
+
+
+      // 3. Atualiza o Gráfico (Gráfico de Rosca)
+      // Faz mais sentido comparar apenas Entradas e Saídas
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Entradas', 'Saídas'],
+          datasets: [{
+            label: 'Fluxo do Mês',
+            // Evita que o gráfico quebre se ambos forem 0
+            data: [resumo.entradas || 1, resumo.saidas || 0], 
+            backgroundColor: [
+              '#2196f3', // Azul para Entradas
+              '#f44336'  // Vermelho para Saídas
+            ],
+            borderColor: '#2b3048', // Cor de fundo do card
+            borderWidth: 4,
+            hoverOffset: 10
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: '#e0e0e0', // Cor do texto da legenda
+                font: { size: 14 }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Roda a função quando a página carregar
+    document.addEventListener("DOMContentLoaded", atualizarDashboard);
+  </script>
+  <script src="js/fechar_mes.js"></script>
+</body>
+</html>

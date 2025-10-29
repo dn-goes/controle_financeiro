@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relatórios — Controle Financeiro</title>
+  
+  <link rel="stylesheet" href="grafico.css">
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  
+  <header class="navbar">
+    <div class="container nav-content">
+      <h1 class="logo">💰 Controle Financeiro</h1>
+      <nav>
+        <a href="index.html">Início</a>
+        <a href="grafico.html" class="active">📈 Relatórios</a>
+        <a href="dividas.html">💳 Dívidas</a>
+        <a href="saldo.html">💰 Saldo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    
+    <section class="report-header">
+      <h2>📊 Painel de Relatórios</h2>
+      <div class="filter-group">
+        <span>Período:</span>
+        <button class="filter-btn" data-meses="3">3 Meses</button>
+        <button class="filter-btn active" data-meses="6">6 Meses</button> <button class="filter-btn" data-meses="12">12 Meses</button>
+      </div>
+    </section>
+
+    <div class="empty-state" id="emptyState">
+      <h3>😕 Nenhum dado encontrado</h3>
+      <p>Parece que você ainda não tem transações. Adicione novas receitas ou despesas nas outras páginas para ver seus relatórios aqui.</p>
+    </div>
+
+    <div class="report-grid" id="reportGrid">
+      
+      <section class="card">
+        <h2>Maiores Despesas (Período)</h2>
+        <div class="chart-container">
+          <canvas id="topExpensesBarChart"></canvas>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Categorias de Saídas (Visão %)</h2>
+        <div class="chart-container">
+          <canvas id="categoryDoughnutChart"></canvas>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Resumo do Período</h2>
+        <div class="estat-grid">
+          <div>
+            <span>Receita Total (Período):</span>
+            <b id="metricaReceitaTotal">R$ 0,00</b>
+          </div>
+          <div>
+            <span>Despesa Total (Período):</span>
+            <b id="metricaDespesaTotal">R$ 0,00</b>
+          </div>
+          <div>
+            <span>Balanço (Receita - Despesa):</span>
+            <b id="metricaBalancoTotal">R$ 0,00</b>
+          </div>
+          <div>
+            <span>Taxa de Poupança:</span>
+            <b id="metricaTaxaPoupanca">0%</b>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Resumo de Dívidas</h2>
+        <div class="estat-grid">
+          <div>
+            <span>Total em Dívidas Ativas:</span>
+            <b id="dividaTotalAtiva">R$ 0,00</b>
+          </div>
+          <div>
+            <span>Total de Dívidas Pagas:</span>
+            <b id="dividaTotalPaga">R$ 0,00</b>
+          </div>
+          <div>
+            <span>Total de Itens (Ativas):</span>
+            <b id="dividaContagemAtiva">0</b>
+          </div>
+          <div>
+            <span>Total de Itens (Pagas):</span>
+            <b id="dividaContagemPaga">0</b>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>Desenvolvido por <b>Daniel</b>, <b>Laiza</b> e <b>Gleice</b> — 2025</p>
+  </footer>
+
+  <script>
+    // Variáveis globais para os gráficos
+    let topExpensesBarChart = null; // <- MUDANÇA: Substitui o monthlyBarChart
+    let categoryDoughnutChart = null;
+
+    // --- FUNÇÃO PRINCIPAL DE CARREGAMENTO ---
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Gera dados de exemplo (mock) se o localStorage estiver vazio
+      verificarEMockarDados();
+
+      // 2. Carrega o relatório com o período padrão (6 meses)
+      carregarRelatorio(6);
+
+      // 3. Adiciona 'click' aos botões de filtro
+      document.querySelectorAll(".filter-btn").forEach(button => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
+          button.classList.add("active");
+          const meses = parseInt(button.dataset.meses);
+          carregarRelatorio(meses);
+        });
+      });
+    });
+
+    /**
+     * Função central que busca dados e atualiza todos os elementos da página.
+     */
+    function carregarRelatorio(numMeses) {
+      // Busca todos os dados necessários
+      const transacoes = JSON.parse(localStorage.getItem("transacoes")) || [];
+      const dividas = JSON.parse(localStorage.getItem("dividas")) || [];
+      const dividasPagas = JSON.parse(localStorage.getItem("dividasPagas")) || [];
+
+      // --- Verificação de Estado Vazio ---
+      if (transacoes.length === 0) {
+        mostrarEstadoVazio(true);
+        atualizarResumoDividas(dividas, dividasPagas);
+        return; 
+      }
+      mostrarEstadoVazio(false);
+
+      // --- Processamento de Dados ---
+      // 1. Processa os dados das categorias de saída
+      const dadosCategorias = processarCategorias(transacoes, numMeses);
+      
+      // 2. Separa os labels (nomes) e data (valores)
+      const labels = dadosCategorias.map(d => d.label);
+      const data = dadosCategorias.map(d => d.valor);
+      
+      // --- Renderização ---
+      // 1. Renderiza o NOVO gráfico de barras horizontais
+      renderizarTopExpensesBarChart(labels, data);
+      
+      // 2. Renderiza o gráfico de rosca (pizza)
+      renderizarGraficoCategorias(labels, data);
+      
+      // 3. Atualiza os cards de métricas (com a lógica simplificada)
+      atualizarMetricas(transacoes, numMeses);
+
+      // 4. Atualiza o resumo de dívidas
+      atualizarResumoDividas(dividas, dividasPagas);
+    }
+
+    /**
+     * Controla a exibição da mensagem de "Estado Vazio"
+     */
+    function mostrarEstadoVazio(isVazio) {
+      const emptyEl = document.getElementById('emptyState');
+      const gridEl = document.getElementById('reportGrid');
+      
+      if (isVazio) {
+        emptyEl.style.display = 'block';
+        gridEl.style.display = 'none';
+      } else {
+        emptyEl.style.display = 'none';
+        gridEl.style.display = 'grid';
+      }
+    }
+
+
+    // --- FUNÇÕES DE PROCESSAMENTO DE DADOS ---
+
+    /**
+     * Processa as categorias de SAÍDA do período.
+     * AGORA ELA TAMBÉM ORDENA O RESULTADO.
+     * @returns {Array} - Um array de objetos ordenado, ex: [{label: "Moradia", valor: 1200}, {label: "Lazer", valor: 300}]
+     */
+    function processarCategorias(transacoes, numMeses) {
+      const categorias = {};
+      const hoje = new Date();
+      const dataInicioPeriodo = new Date(hoje.getFullYear(), hoje.getMonth() - numMeses + 1, 1);
+
+      // 1. Agrupa as transações por categoria
+      for (const transacao of transacoes) {
+        const dataTransacao = new Date(transacao.data);
+
+        if (transacao.tipo === 'saida' && dataTransacao >= dataInicioPeriodo) {
+          const cat = transacao.categoria || 'Outros';
+          if (!categorias[cat]) {
+            categorias[cat] = 0;
+          }
+          categorias[cat] += transacao.valor;
+        }
+      }
+      
+      // 2. Converte o objeto para um array
+      const arrayCategorias = Object.keys(categorias).map(label => {
+        return { label: label, valor: categorias[label] };
+      });
+
+      // 3. ORDENA o array do maior valor para o menor
+      arrayCategorias.sort((a, b) => b.valor - a.valor);
+      
+      return arrayCategorias;
+    }
+
+
+    // --- FUNÇÕES DE RENDERIZAÇÃO (GRÁFICOS) ---
+
+    /**
+     * [NOVO] Renderiza o Gráfico de Barras Horizontais com as Maiores Despesas
+     */
+    function renderizarTopExpensesBarChart(labels, data) {
+      const ctx = document.getElementById('topExpensesBarChart').getContext('2d');
+      
+      if (topExpensesBarChart) {
+        topExpensesBarChart.destroy();
+      }
+
+      // Se não houver dados, exibe uma mensagem
+      if (data.length === 0) {
+        data = [1];
+        labels = ["Nenhuma saída no período"];
+      }
+      
+      topExpensesBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Total Gasto (R$)',
+            data: data,
+            backgroundColor: 'var(--primary-blue)',
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          indexAxis: 'y', // <-- ISSO FAZ O GRÁFICO SER HORIZONTAL
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { beginAtZero: true, ticks: { color: 'var(--text-secondary)' } },
+            y: { ticks: { color: 'var(--text-secondary)' } }
+          },
+          plugins: {
+            legend: { // Esconde a legenda, pois só tem 1 dataset
+              display: false 
+            }
+          }
+        }
+      });
+    }
+
+    /**
+     * Renderiza o Gráfico de Rosca (Categorias %)
+     */
+    function renderizarGraficoCategorias(labels, data) {
+      const ctx = document.getElementById('categoryDoughnutChart').getContext('2d');
+      
+      if (categoryDoughnutChart) {
+        categoryDoughnutChart.destroy();
+      }
+      
+      // Se não houver dados
+      if (data.length === 0) {
+        data = [1];
+        labels = ["Nenhuma saída no período"];
+        const backgroundColors = ['#4a506e']; 
+        
+        categoryDoughnutChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: labels,
+            datasets: [{ data: data, backgroundColor: backgroundColors, borderColor: 'var(--card-bg)', borderWidth: 4 }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: true, position: 'bottom', labels: { color: 'var(--text-primary)', font: { size: 14 } } }
+            }
+          }
+        });
+        return; 
+      }
+
+      // Se houver dados, usa as cores normais
+      const backgroundColors = ['#1e88e5', '#e53935', '#f57c00', '#43a047', '#ffb300', '#6d4c41'];
+      
+      categoryDoughnutChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: backgroundColors,
+            borderColor: 'var(--card-bg)',
+            borderWidth: 4,
+            hoverOffset: 10
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: 'var(--text-primary)', font: { size: 14 } }
+            }
+          }
+        }
+      });
+    }
+
+    // --- FUNÇÕES DE ATUALIZAÇÃO (MÉTRICAS) ---
+
+    function formatCurrency(value) {
+      return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    /**
+     * [MODIFICADO] Atualiza os cards de "Métricas Chave" com totais do período.
+     */
+    function atualizarMetricas(transacoes, numMeses) {
+      const hoje = new Date();
+      const dataInicioPeriodo = new Date(hoje.getFullYear(), hoje.getMonth() - numMeses + 1, 1);
+
+      let totalEntradas = 0;
+      let totalSaidas = 0;
+
+      // Filtra transações do período e soma
+      for (const transacao of transacoes) {
+        const dataTransacao = new Date(transacao.data);
+        if (dataTransacao >= dataInicioPeriodo) {
+          if (transacao.tipo === 'entrada') {
+            totalEntradas += transacao.valor;
+          } else if (transacao.tipo === 'saida') {
+            totalSaidas += transacao.valor;
+          }
+        }
+      }
+
+      const balancoTotal = totalEntradas - totalSaidas;
+      
+      // Calcula taxa de poupança (evita divisão por zero)
+      let taxaPoupanca = 0;
+      if (totalEntradas > 0) {
+        taxaPoupanca = (balancoTotal / totalEntradas) * 100;
+      }
+
+      // Atualiza o HTML
+      document.getElementById('metricaReceitaTotal').textContent = formatCurrency(totalEntradas);
+      document.getElementById('metricaDespesaTotal').textContent = formatCurrency(totalSaidas);
+      
+      const balancoEl = document.getElementById('metricaBalancoTotal');
+      balancoEl.textContent = formatCurrency(balancoTotal);
+      balancoEl.className = balancoTotal >= 0 ? 'positivo' : 'negativo';
+      
+      // Garante que a taxa de poupança não seja negativa (se gastou mais que ganhou, é 0%)
+      document.getElementById('metricaTaxaPoupanca').textContent = `${Math.max(0, taxaPoupanca).toFixed(0)}%`;
+    }
+
+    /**
+     * Atualiza o card "Resumo de Dívidas" (sem alterações)
+     */
+    function atualizarResumoDividas(dividas, dividasPagas) {
+      const totalAtivas = dividas.reduce((acc, div) => acc + (div.valor || 0), 0);
+      const totalPagas = dividasPagas.reduce((acc, div) => acc + (div.valor || 0), 0);
+
+      document.getElementById('dividaTotalAtiva').textContent = formatCurrency(totalAtivas);
+      document.getElementById('dividaTotalPaga').textContent = formatCurrency(totalPagas);
+      document.getElementById('dividaContagemAtiva').textContent = dividas.length;
+      document.getElementById('dividaContagemPaga').textContent = dividasPagas.length;
+    }
+
+    // --- FUNÇÃO DE MOCK DE DADOS (PARA TESTE) ---
+
+    /**
+     * Cria dados fictícios no localStorage se não houverem dados.
+     * (Sem alterações)
+     */
+    function verificarEMockarDados() {
+      // Só cria dados MOCK se 'transacoes' NÃO existir
+      if (!localStorage.getItem('transacoes')) {
+        console.warn("Nenhuma transação encontrada. Criando dados MOCK...");
+        
+        const transacoesMock = [];
+        const categoriasMock = ['Moradia', 'Transporte', 'Alimentação', 'Lazer', 'Saúde'];
+        const hoje = new Date();
+        let idCounter = 1;
+
+        for (let mes = 12; mes >= 0; mes--) { // 12 meses de dados
+          transacoesMock.push({
+            id: idCounter++,
+            data: new Date(hoje.getFullYear(), hoje.getMonth() - mes, 1).toISOString(),
+            tipo: 'entrada',
+            valor: 3500 + Math.random() * 500,
+            categoria: 'Salário',
+            descricao: 'Salário Mensal'
+          });
+          
+          for (let i = 0; i < 12; i++) {
+            const dia = Math.floor(Math.random() * 28) + 1;
+            const categoria = categoriasMock[Math.floor(Math.random() * categoriasMock.length)];
+            transacoesMock.push({
+              id: idCounter++,
+              data: new Date(hoje.getFullYear(), hoje.getMonth() - mes, dia).toISOString(),
+              tipo: 'saida',
+              valor: Math.random() * 150 + 20,
+              categoria: categoria,
+              descricao: `Compra em ${categoria}`
+            });
+          }
+        }
+        localStorage.setItem('transacoes', JSON.stringify(transacoesMock));
+      }
+
+      if (!localStorage.getItem('dividas')) {
+        const dividasMock = [
+          { id: 1, nome: 'Cartão Nubank', valor: 850.70, vencimento: '2025-11-20' },
+          { id: 2, nome: 'Financiamento Apto', valor: 1200.00, vencimento: '2025-11-10' }
+        ];
+        localStorage.setItem('dividas', JSON.stringify(dividasMock));
+
+        // Também cria um resumo financeiro mock
+        const resumoMock = { saldo: 500, entradas: 3500, saidas: 3000 };
+        localStorage.setItem('resumoFinanceiro', JSON.stringify(resumoMock));
+      }
+
+      if (!localStorage.getItem('dividasPagas')) {
+        const dividasPagasMock = [
+          { id: 3, nome: 'Cartão Inter', valor: 430.20, vencimento: '2025-10-20' }
+        ];
+        localStorage.setItem('dividasPagas', JSON.stringify(dividasPagasMock));
+      }
+    }
+  </script>
+</body>
+</html>
